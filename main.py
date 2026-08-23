@@ -1,5 +1,6 @@
 import time
 import oscillator
+import envelope
 from engine import AudioEngine
 
 SAMPLE_RATE = 44100
@@ -11,11 +12,11 @@ def test_oscillators():
     (also tests noise for now)
     """
     test_oscs = [
-        oscillator.SineOscillator(freq=880, sample_rate=SAMPLE_RATE),
-        oscillator.SawOscillator(freq=110, sample_rate=SAMPLE_RATE),
-        oscillator.TriangleOscillator(freq=440, sample_rate=SAMPLE_RATE),
-        oscillator.SquareOscillator(freq=220, sample_rate=SAMPLE_RATE, duty_cycle=0.5),
-        oscillator.SquareOscillator(freq=220, sample_rate=SAMPLE_RATE, duty_cycle=0.8),
+        oscillator.SineOscillator(freq=880.0, sample_rate=SAMPLE_RATE),
+        oscillator.SawOscillator(freq=110.0, sample_rate=SAMPLE_RATE),
+        oscillator.TriangleOscillator(freq=440.0, sample_rate=SAMPLE_RATE),
+        oscillator.SquareOscillator(freq=220.0, sample_rate=SAMPLE_RATE, duty_cycle=0.5),
+        oscillator.SquareOscillator(freq=220.0, sample_rate=SAMPLE_RATE, duty_cycle=0.8),
     ]
 
     engine = AudioEngine(test_oscs[0], sample_rate=SAMPLE_RATE, block_size=BLOCK_SIZE)
@@ -39,5 +40,29 @@ def test_oscillators():
 
     engine.stop()
 
+def test_envelope():
+    test_env = envelope.Envelope(attack_ms=1, decay_ms=200, sustain_level=0, release_ms=400, sample_rate=SAMPLE_RATE)
+
+    # test shape via array print
+    """
+    block1 = env.process(gate_on=True, n=5000)
+    block2 = env.process(gate_on=False, n=5000)
+    print(block1[::100])  # print every 100th sample for shape verification
+    print(block2[::100])
+    """
+
+    test_osc = oscillator.TriangleOscillator(freq=440.0, sample_rate=SAMPLE_RATE)
+
+    engine = AudioEngine(test_osc, test_env, sample_rate=SAMPLE_RATE, block_size=BLOCK_SIZE)
+    engine.start()
+
+    engine.gate_on = True
+    time.sleep(2)
+
+    engine.gate_on = False
+    time.sleep(1)
+
+    engine.stop()
+
 if __name__ == '__main__':
-    test_oscillators()
+    test_envelope()

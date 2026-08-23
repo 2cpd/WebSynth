@@ -5,7 +5,7 @@ class Oscillator(ABC):
     def __init__(self, freq, sample_rate):
         self.freq = freq
         self.sample_rate = sample_rate
-        self.phase = 0 # phase starts at 0 @ init
+        self.phase = 0.0 # phase starts at 0 @ init
 
     def generate(self, n):
     # generates sin wave w/ designated params for n samples

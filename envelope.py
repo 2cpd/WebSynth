@@ -61,10 +61,13 @@ class Envelope:
                 self.current_level = self.sustain_level
 
             elif self.state == State.RELEASE:
-                self.current_level -= self.release_rate
-                if self.current_level <= 0.0:
-                    self.current_level = 0.0
-                    self.state = State.IDLE
+                if gate_on:
+                    self.state = State.ATTACK
+                else:
+                    self.current_level -= self.release_rate
+                    if self.current_level <= 0.0:
+                        self.current_level = 0.0
+                        self.state = State.IDLE
 
             output[i] = self.current_level
 

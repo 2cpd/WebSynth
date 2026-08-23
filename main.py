@@ -41,7 +41,7 @@ def test_oscillators():
     engine.stop()
 
 def test_envelope():
-    test_env = envelope.Envelope(attack_ms=1, decay_ms=200, sustain_level=0, release_ms=400, sample_rate=SAMPLE_RATE)
+    test_env = envelope.Envelope(attack_ms=1000, decay_ms=1000, sustain_level=0.5, release_ms=1000, sample_rate=SAMPLE_RATE)
 
     # test shape via array print
     """
@@ -56,13 +56,23 @@ def test_envelope():
     engine = AudioEngine(test_osc, test_env, sample_rate=SAMPLE_RATE, block_size=BLOCK_SIZE)
     engine.start()
 
-    engine.gate_on = True
-    time.sleep(2)
-
-    engine.gate_on = False
-    time.sleep(1)
-
-    engine.stop()
+    print("Gate controls for env test: 'a' on, 's' off, 'q' quit")
+    try:
+        while True:
+            cmd = input().strip().lower()
+            if cmd == "a":
+                engine.gate_on = True
+                print("Gate on")
+            elif cmd == "s":
+                engine.gate_on = False
+                print("Gate off")
+            elif cmd == "q":
+                break
+            else:
+                print("invalid cmd")
+    finally:
+        engine.stop()
+        print("Stopped")
 
 if __name__ == '__main__':
     test_envelope()

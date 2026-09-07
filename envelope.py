@@ -12,20 +12,23 @@ class State(Enum):
 
 class Envelope:
     def __init__(self, attack_ms, decay_ms, sustain_level, release_ms, sample_rate):
-        # params used directly
         self.sustain_level = sustain_level
         self.sample_rate = sample_rate
 
-        # params that need calc/conv
         self.attack_rate = 1.0 / (attack_ms / 1000.0 * sample_rate)
         self.decay_rate = (1.0 - sustain_level) / (decay_ms / 1000.0 * sample_rate)
-        self.release_rate = sustain_level / (release_ms / 1000.0 * sample_rate)
         # rate = amount of change in env lvl to next state / #samples to reach that lvl
+
+        self.release_ms = release_ms
+        """
+        self.release_rate = sustain_level / (release_ms / 1000.0 * sample_rate)
+        """
+        # fixed rls rate causes bug for sustain level = 0, calculate rate on the fly in process()
 
         self.state = State.IDLE # env always starts at IDLE
         self.current_level = 0.0
 
-    def process(self, gate_on, n):
+    def process(self, n, gate_on):
     # with type hints: def process(self, gate_on:bool, n:int): -> np.ndarray:
         # generate n samples, check state for each sample
 
@@ -38,7 +41,7 @@ class Envelope:
                     self.state = State.ATTACK
 
             elif self.state == State.ATTACK:
-                if not gate_on: # edge case if key released during attack
+                if not gate_on: # edge case if key released
                     self.state = State.RELEASE
                 else:
                     self.current_level += self.attack_rate
@@ -47,7 +50,7 @@ class Envelope:
                         self.state = State.DECAY
 
             elif self.state == State.DECAY:
-                if not gate_on: # edge case if key released during attack
+                if not gate_on: # edge case if key released
                     self.state = State.RELEASE
                 else:
                     self.current_level -= self.decay_rate
@@ -64,7 +67,8 @@ class Envelope:
                 if gate_on:
                     self.state = State.ATTACK
                 else:
-                    self.current_level -= self.release_rate
+                    release_rate = self.current_level / (self.release_ms / 1000.0 * self.sample_rate)
+                    self.current_level -= release_rate
                     if self.current_level <= 0.0:
                         self.current_level = 0.0
                         self.state = State.IDLE

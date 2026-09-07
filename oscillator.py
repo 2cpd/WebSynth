@@ -45,7 +45,6 @@ class TriangleOscillator(Oscillator): # extends oscillator
         # subtract from 1 to invert and start from minval; range [-1, 1)
 
 class SquareOscillator(Oscillator): # extends oscillator
-    # @Override needed here if in java
     def __init__(self, freq, sample_rate, duty_cycle=0.5):
         super().__init__(freq=freq, sample_rate=sample_rate)
         self.duty_cycle = duty_cycle
@@ -57,7 +56,6 @@ class SquareOscillator(Oscillator): # extends oscillator
 class WhiteNoiseGenerator(Oscillator):
 # TODO: if needed, refactor noise gen to diff class
 # for now, noise generator goes under oscillator
-    # @Override
     def __init__(self, sample_rate, freq=0):
         super().__init__(freq=freq, sample_rate=sample_rate)
     """

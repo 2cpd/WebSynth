@@ -2,7 +2,7 @@ import oscillator
 import envelope
 
 class Voice:
-    def __init__(self, osc, env):
+    def __init__(self, osc: oscillator.Oscillator, env: envelope.Envelope):
         self.osc = osc
         self.env = env
 

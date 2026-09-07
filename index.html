@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<body>
+    <button id="gate-button">Gate OFF</button>
+
+    <script>
+        const web_socket = new WebSocket("ws://localhost:8000/ws");
+        const button = document.getElementById("gate-button");
+        let gate_on = false; // off by default
+
+        button.onclick = () => {
+            gate_on = !gate_on;
+            button.textContent = gate_on ? "Gate ON" : "Gate OFF";
+            web_socket.send(JSON.stringify({type: "gate", value: gate_on}));
+        };
+    </script>
+</body>
+</html>

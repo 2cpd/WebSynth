@@ -76,3 +76,13 @@ class Envelope:
             output[i] = self.current_level
 
         return output
+
+    # setters for adjustments on the fly after init
+    def set_attack(self, ms):
+        self.attack_rate = 1.0 / (ms / 1000.0 * self.sample_rate)
+    def set_decay(self, ms):
+        self.decay_rate = (1.0 - self.sustain_level) / (ms / 1000.0 * self.sample_rate)
+    def set_sustain(self, level):
+        self.sustain_level = level
+    def set_release(self, ms):
+        self.release_ms = ms

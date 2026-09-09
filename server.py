@@ -54,7 +54,7 @@ async def websocket_endpoint(websocket: WebSocket):
             elif msg_value == "tri":
                 engine.voice.osc = oscillator.TriangleOscillator(curr_freq, engine.sample_rate)
             elif msg_value == "sqr":
-                engine.voice.osc = oscillator.SquareOscillator(curr_freq, engine.sample_rate, 50)
+                engine.voice.osc = oscillator.SquareOscillator(curr_freq, engine.sample_rate, 0.5)
             engine.voice.osc.phase = curr_phase
         elif msg_type == "attack":
             engine.voice.env.set_attack(float(msg_value))

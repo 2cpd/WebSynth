@@ -61,7 +61,7 @@
 
         // waveform selection
         const dutyBox = document.getElementById("duty-box");
-        document.querySelectorAll('input[name="waveform"]').forEach(radio => {
+        document.querySelectorAll('input[name="selected_waveform"]').forEach(radio => {
             radio.onchange = () => {
                 web_socket.send(JSON.stringify({type: "waveform", value: radio.value}));
                 dutyBox.style.display = (radio.value === "sqr") ? "block" : "none";

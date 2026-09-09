@@ -1,18 +1,89 @@
 <!DOCTYPE html>
 <html>
 <body>
+    <!-- gate on/off -->
+    <h3>Gate</h3>
     <button id="gate-button">Gate OFF</button>
+
+    <!-- waveform select -->
+    <h3>Waveform</h3>
+    <form id="waveform-form">
+        <input type="radio" id="sin" name="selected_waveform" value="sin">
+        <label for="sin">Sine</label><br>
+        <input type="radio" id="saw" name="selected_waveform" value="saw">
+        <label for="saw">Saw</label><br>
+        <input type="radio" id="tri" name="selected_waveform" value="tri">
+        <label for="tri">Triangle</label><br>
+        <input type="radio" id="sqr" name="selected_waveform" value="sqr">
+        <label for="sqr">Square</label><br>
+    </form>
+    <!-- duty cycle button, only for sqr, hidden o/w -->
+    <div id="duty-box" style="display: none; margin-top: 10px;">
+        <label>
+            Duty: <span id="duty-val">0.5</span>
+            <input type="range" id="duty" min="0.05" max="0.95" step="0.05" value="0.5">
+        </label>
+        </div>
+
+    <h3>Parameters</h3>
+    <label>
+        Freq: <span id="freq-val">440</span> Hz
+        <input type="range" id="freq" min="110" max="880" value="440">
+    </label><br>
+    <label>
+        Attack: <span id="attack-val">100</span> ms
+        <input type="range" id="attack" min="10" max="1000" value="100">
+    </label><br>
+    <label>
+        Decay: <span id="decay-val">200</span> ms
+        <input type="range" id="decay" min="10" max="1000" value="200">
+    </label><br>
+    <label>
+        Sustain: <span id="sustain-val">0.5</span>
+        <input type="range" id="sustain" min="0" max="1" step="0.01" value="0.5">
+    </label><br>
+    <label>
+        Release: <span id="release-val">300</span> ms
+        <input type="range" id="release" min="10" max="2000" value="300">
+    </label><br>
 
     <script>
         const web_socket = new WebSocket("ws://localhost:8000/ws");
+
+        // gate button
         const button = document.getElementById("gate-button");
         let gate_on = false; // off by default
-
         button.onclick = () => {
             gate_on = !gate_on;
             button.textContent = gate_on ? "Gate ON" : "Gate OFF";
             web_socket.send(JSON.stringify({type: "gate", value: gate_on}));
         };
+
+        // waveform selection
+        const dutyBox = document.getElementById("duty-box");
+        document.querySelectorAll('input[name="waveform"]').forEach(radio => {
+            radio.onchange = () => {
+                web_socket.send(JSON.stringify({type: "waveform", value: radio.value}));
+                dutyBox.style.display = (radio.value === "sqr") ? "block" : "none";
+            };
+        });
+
+        // slider helper
+        function wireSlider(id, msgType) {
+            const slider = document.getElementById(id);
+            const display = document.getElementById(id + "-val");
+            slider.oninput = () => {
+                display.textContent = slider.value;
+                web_socket.send(JSON.stringify({type: msgType, value: parseFloat(slider.value)}));
+            };
+        }
+
+        wireSlider("freq", "freq");
+        wireSlider("attack", "attack");
+        wireSlider("decay", "decay");
+        wireSlider("sustain", "sustain");
+        wireSlider("release", "release");
+        wireSlider("duty", "duty");
     </script>
 </body>
 </html>

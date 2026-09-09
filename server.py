@@ -13,6 +13,7 @@ from fastapi.responses import FileResponse
 
 SAMPLE_RATE = 44100
 BLOCK_SIZE = 512
+current_duty = 0.5 # default duty value for sqr wave
 
 app = FastAPI()
 
@@ -29,6 +30,7 @@ async def get():
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
+    global current_duty # points to global variable at top
     await websocket.accept()
     while True:
         data = await websocket.receive_json()
@@ -37,13 +39,14 @@ async def websocket_endpoint(websocket: WebSocket):
 
         if msg_type == "gate":
             engine.gate_on = msg_value
+
         elif msg_type == "freq":
             engine.voice.osc.freq = float(msg_value)
+
         elif msg_type == "waveform":
             # change osc but preserve curr freq & phase
             curr_freq = engine.voice.osc.freq
             curr_phase = engine.voice.osc.phase
-
             # wave types: sin, saw, tri, sqr
                 # no noise for now
                 # sqr needs load % (default to 50 for now)
@@ -54,8 +57,13 @@ async def websocket_endpoint(websocket: WebSocket):
             elif msg_value == "tri":
                 engine.voice.osc = oscillator.TriangleOscillator(curr_freq, engine.sample_rate)
             elif msg_value == "sqr":
-                engine.voice.osc = oscillator.SquareOscillator(curr_freq, engine.sample_rate, 0.5)
+                engine.voice.osc = oscillator.SquareOscillator(curr_freq, engine.sample_rate, current_duty)
             engine.voice.osc.phase = curr_phase
+        elif msg_type == "duty": # handle duty slider for sqr waves
+            current_duty = float(msg_value)
+            if isinstance(engine.voice.osc, oscillator.SquareOscillator):
+                engine.voice.osc.duty_cycle = current_duty
+
         elif msg_type == "attack":
             engine.voice.env.set_attack(float(msg_value))
         elif msg_type == "decay":
